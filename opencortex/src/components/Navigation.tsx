@@ -1,14 +1,17 @@
 "use client";
 
+export type TabId = "ideas" | "papers" | "spotlight" | "connect";
+
 interface NavigationProps {
-  activeTab: "ideas" | "papers" | "spotlight";
-  onTabChange: (tab: "ideas" | "papers" | "spotlight") => void;
+  activeTab: TabId;
+  onTabChange: (tab: TabId) => void;
 }
 
 const tabs = [
   { id: "ideas" as const, label: "Ideas", icon: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" },
   { id: "papers" as const, label: "Papers", icon: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" },
   { id: "spotlight" as const, label: "Spotlight", icon: "M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26z" },
+  { id: "connect" as const, label: "Connect", icon: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" },
 ];
 
 export default function Navigation({ activeTab, onTabChange }: NavigationProps) {

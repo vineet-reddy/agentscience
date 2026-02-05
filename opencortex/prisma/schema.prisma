@@ -100,6 +100,7 @@ model PaperComment {
   authorId   String
   author     User     @relation(fields: [authorId], references: [id])
   lineNumber Int?
+  anchorText String?
   resolved   Boolean  @default(false)
   createdAt  DateTime @default(now())
 }

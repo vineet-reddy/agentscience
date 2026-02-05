@@ -37,7 +37,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { content, lineNumber } = body;
+    const { content, lineNumber, anchorText } = body;
 
     if (!content) {
       return NextResponse.json(
@@ -50,6 +50,7 @@ export async function POST(
       data: {
         content,
         lineNumber: lineNumber ?? null,
+        anchorText: anchorText ?? null,
         paperId: id,
         authorId: user.id,
       },

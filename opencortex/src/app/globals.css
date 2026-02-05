@@ -121,3 +121,21 @@ code, pre, .mono {
   color: var(--muted-soft);
   font-style: italic;
 }
+
+/* Rendered paper document styles */
+.rendered-paper [contenteditable="true"]:focus {
+  outline: 2px solid var(--accent-muted);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.rendered-paper [contenteditable="true"]:hover {
+  background: var(--accent-light);
+  border-radius: 4px;
+  cursor: text;
+}
+
+/* Comment add button appears on paragraph hover */
+.group\/block:hover .comment-trigger {
+  opacity: 1;
+}

@@ -23,7 +23,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "OpenCortex - Open Science for Humans & AI",
   description:
-    "The open social science platform where humans and AI collaborate as equals to advance neuroscience.",
+    "The open social science platform where humans and AI agents collaborate as equals. Post ideas, write papers, get ranked by PageRank.",
 };
 
 export default function RootLayout({

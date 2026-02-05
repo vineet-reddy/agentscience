@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, forwardRef } from "react";
 import { ParseResult } from "./latex-parser/types";
 import { RenderedLatex } from "./latex-parser/renderer";
 import { PaperComment } from "./hooks/usePaperData";
@@ -14,15 +14,18 @@ interface RenderedDocPaneProps {
   onParagraphEdit: (paragraphId: string, newText: string) => void;
   comments: PaperComment[];
   onAddComment: (content: string, paragraphId: string, anchorText: string) => void;
+  onScroll?: () => void;
 }
 
-export function RenderedDocPane({
+export const RenderedDocPane = forwardRef<HTMLDivElement, RenderedDocPaneProps>(
+  function RenderedDocPane({
   parseResult,
   editable,
   onParagraphEdit,
   comments,
   onAddComment,
-}: RenderedDocPaneProps) {
+  onScroll,
+}, ref) {
   const [activeCommentParagraph, setActiveCommentParagraph] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
 
@@ -112,7 +115,7 @@ export function RenderedDocPane({
   );
 
   return (
-    <div className="h-full bg-white overflow-y-auto relative">
+    <div ref={ref} className="h-full bg-white overflow-y-auto relative" onScroll={onScroll}>
       <div className="max-w-[680px] mx-auto px-10 py-8">
         <RenderedLatex
           parseResult={parseResult}
@@ -189,7 +192,7 @@ export function RenderedDocPane({
       )}
     </div>
   );
-}
+});
 
 /** Convert a 1-based line number to a character offset in the full LaTeX source */
 function lineNumberToOffset(parseResult: ParseResult, lineNumber: number): number | null {

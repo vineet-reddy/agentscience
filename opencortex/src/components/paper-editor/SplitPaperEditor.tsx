@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import Avatar from "../Avatar";
 import TimeAgo from "../TimeAgo";
 import { usePaperData } from "./hooks/usePaperData";
 import { useBidirectionalEdit } from "./hooks/useBidirectionalEdit";
 import { useRealtimeSync } from "./hooks/useRealtimeSync";
-import { LatexSourcePane } from "./LatexSourcePane";
+import { LatexSourcePane, LatexSourcePaneRef } from "./LatexSourcePane";
 import { RenderedDocPane } from "./RenderedDocPane";
 import { EditsPanel } from "./EditsPanel";
 import { CommentThread } from "./CommentThread";
+import { LatexNode } from "./latex-parser/types";
 
 interface SplitPaperEditorProps {
   paperId: string;
@@ -30,6 +31,147 @@ export default function SplitPaperEditor({ paperId, onBack }: SplitPaperEditorPr
   const [editDescription, setEditDescription] = useState("");
   const [saving, setSaving] = useState(false);
   const [activePanel, setActivePanel] = useState<"split" | "comments" | "edits">("split");
+  const [scrollSyncEnabled, setScrollSyncEnabled] = useState(true);
+
+  // Refs for scroll sync
+  const sourceRef = useRef<LatexSourcePaneRef>(null);
+  const renderedRef = useRef<HTMLDivElement>(null);
+  const isSyncingRef = useRef(false);
+  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Build line offset map for scroll sync
+  const lineOffsets = useMemo(() => {
+    const offsets: number[] = [0];
+    for (let i = 0; i < latex.length; i++) {
+      if (latex[i] === "\n") {
+        offsets.push(i + 1);
+      }
+    }
+    return offsets;
+  }, [latex]);
+
+  // Find node containing a character offset
+  const findNodeAtOffset = useCallback((offset: number): LatexNode | null => {
+    function search(nodes: LatexNode[]): LatexNode | null {
+      for (const node of nodes) {
+        if (offset >= node.sourceRange.start && offset <= node.sourceRange.end) {
+          const childMatch = search(node.children);
+          if (childMatch) return childMatch;
+          return node;
+        }
+      }
+      return null;
+    }
+    return search(parseResult.nodes);
+  }, [parseResult.nodes]);
+
+  // Handle source pane scroll -> sync to rendered
+  const handleSourceScroll = useCallback(() => {
+    if (!scrollSyncEnabled || isSyncingRef.current) return;
+
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+
+    syncTimeoutRef.current = setTimeout(() => {
+      const textarea = sourceRef.current?.textarea;
+      const container = renderedRef.current;
+      if (!textarea || !container) return;
+
+      const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 20.8;
+      const paddingTop = parseFloat(getComputedStyle(textarea).paddingTop) || 16;
+      const lineNumber = Math.max(1, Math.floor((textarea.scrollTop - paddingTop + lineHeight / 2) / lineHeight) + 1);
+      
+      const idx = Math.min(lineNumber - 1, lineOffsets.length - 1);
+      const charOffset = lineOffsets[idx] ?? 0;
+      const node = findNodeAtOffset(charOffset);
+
+      if (node) {
+        const element = container.querySelector(`[data-paragraph-id="${node.paragraphId}"]`);
+        if (element) {
+          isSyncingRef.current = true;
+          const containerRect = container.getBoundingClientRect();
+          const elementRect = element.getBoundingClientRect();
+          const offsetInContainer = elementRect.top - containerRect.top + container.scrollTop;
+          
+          container.scrollTo({
+            top: Math.max(0, offsetInContainer - 60),
+            behavior: "smooth",
+          });
+
+          setTimeout(() => { isSyncingRef.current = false; }, 300);
+        }
+      }
+    }, 50);
+  }, [scrollSyncEnabled, lineOffsets, findNodeAtOffset]);
+
+  // Handle rendered pane scroll -> sync to source
+  const handleRenderedScroll = useCallback(() => {
+    if (!scrollSyncEnabled || isSyncingRef.current) return;
+
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+
+    syncTimeoutRef.current = setTimeout(() => {
+      const textarea = sourceRef.current?.textarea;
+      const container = renderedRef.current;
+      if (!textarea || !container) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const elements = container.querySelectorAll("[data-paragraph-id]");
+      
+      let topElement: Element | null = null;
+      for (const el of elements) {
+        const rect = el.getBoundingClientRect();
+        if (rect.top >= containerRect.top - 50) {
+          topElement = el;
+          break;
+        }
+      }
+
+      if (!topElement) return;
+
+      const paragraphId = topElement.getAttribute("data-paragraph-id");
+      if (!paragraphId) return;
+
+      // Find the node
+      function findNode(nodes: LatexNode[]): LatexNode | null {
+        for (const n of nodes) {
+          if (n.paragraphId === paragraphId) return n;
+          const child = findNode(n.children);
+          if (child) return child;
+        }
+        return null;
+      }
+
+      const node = findNode(parseResult.nodes);
+      if (!node) return;
+
+      // Find line number
+      const offset = node.sourceRange.start;
+      let lineNumber = 1;
+      for (let i = 0; i < lineOffsets.length; i++) {
+        if (lineOffsets[i] <= offset) lineNumber = i + 1;
+        else break;
+      }
+
+      const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 20.8;
+      const paddingTop = parseFloat(getComputedStyle(textarea).paddingTop) || 16;
+      const targetScrollTop = paddingTop + (lineNumber - 1) * lineHeight;
+
+      isSyncingRef.current = true;
+      textarea.scrollTo({
+        top: Math.max(0, targetScrollTop - 40),
+        behavior: "smooth",
+      });
+
+      setTimeout(() => { isSyncingRef.current = false; }, 300);
+    }, 50);
+  }, [scrollSyncEnabled, parseResult.nodes, lineOffsets]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    };
+  }, []);
 
   // Sync initial paper data to editor
   useEffect(() => {
@@ -205,20 +347,36 @@ export default function SplitPaperEditor({ paperId, onBack }: SplitPaperEditorPr
             {/* Left: LaTeX Source */}
             <div className="border-r border-[var(--border)] overflow-hidden flex flex-col">
               <div className="px-4 py-2 bg-[var(--surface-warm)] border-b border-[var(--border)] flex items-center justify-between flex-none">
-                <span className="text-[12px] text-[var(--muted)]" style={{ fontFamily: "var(--font-mono), monospace" }}>
-                  LaTeX Source
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-[12px] text-[var(--muted)]" style={{ fontFamily: "var(--font-mono), monospace" }}>
+                    LaTeX Source
+                  </span>
+                  <button
+                    onClick={() => setScrollSyncEnabled(!scrollSyncEnabled)}
+                    className={`text-[10px] px-2 py-0.5 rounded-full transition-colors ${
+                      scrollSyncEnabled 
+                        ? "bg-[var(--accent-light)] text-[var(--accent)]" 
+                        : "bg-[var(--surface-hover)] text-[var(--muted)]"
+                    }`}
+                    style={{ fontFamily: "var(--font-mono), monospace" }}
+                    title={scrollSyncEnabled ? "Scroll sync on" : "Scroll sync off"}
+                  >
+                    {scrollSyncEnabled ? "Sync" : "Sync off"}
+                  </button>
+                </div>
                 {isDirty && (
                   <span className="text-[11px] text-[var(--warning)] px-2 py-0.5 rounded-full bg-[var(--warning-light)]" style={{ fontFamily: "var(--font-mono), monospace" }}>
                     modified
                   </span>
                 )}
               </div>
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-hidden">
                 <LatexSourcePane
+                  ref={sourceRef}
                   latex={latex}
                   onChange={setLatex}
                   readOnly={!editMode}
+                  onScroll={handleSourceScroll}
                 />
               </div>
             </div>
@@ -233,13 +391,15 @@ export default function SplitPaperEditor({ paperId, onBack }: SplitPaperEditorPr
                   {editMode ? "Click text to edit" : "Read only"}
                 </span>
               </div>
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-hidden">
                 <RenderedDocPane
+                  ref={renderedRef}
                   parseResult={parseResult}
                   editable={editMode}
                   onParagraphEdit={updateFromRendered}
                   comments={paper.comments}
                   onAddComment={addComment}
+                  onScroll={handleRenderedScroll}
                 />
               </div>
             </div>

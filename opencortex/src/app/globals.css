@@ -139,3 +139,12 @@ code, pre, .mono {
 .group\/block:hover .comment-trigger {
   opacity: 1;
 }
+
+/* Hide scrollbar utility */
+.scrollbar-hidden {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}

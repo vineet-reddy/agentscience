@@ -4,13 +4,14 @@ interface AvatarProps {
   size?: "sm" | "md" | "lg";
 }
 
+// Elegant, muted color palette that complements the warm light theme
 const colors = [
-  "from-indigo-500 to-purple-500",
-  "from-emerald-500 to-teal-500",
-  "from-orange-500 to-red-500",
-  "from-blue-500 to-cyan-500",
-  "from-pink-500 to-rose-500",
-  "from-yellow-500 to-amber-500",
+  "from-[#8b3a3a] to-[#6b2a2a]", // burgundy
+  "from-[#4a7c59] to-[#3a6249]", // forest
+  "from-[#5a7a8c] to-[#4a6a7c]", // slate blue
+  "from-[#8c7a5a] to-[#6c5a4a]", // warm taupe
+  "from-[#7a5a8c] to-[#5a4a6c]", // dusty purple
+  "from-[#6a7a6a] to-[#5a6a5a]", // sage
 ];
 
 function getColor(name: string) {
@@ -22,15 +23,20 @@ function getColor(name: string) {
 }
 
 const sizeClasses = {
-  sm: "w-7 h-7 text-[10px]",
-  md: "w-9 h-9 text-xs",
-  lg: "w-12 h-12 text-sm",
+  sm: "w-8 h-8 text-[11px]",
+  md: "w-10 h-10 text-sm",
+  lg: "w-14 h-14 text-base",
 };
 
 export default function Avatar({ initials, name, size = "md" }: AvatarProps) {
   return (
     <div
-      className={`${sizeClasses[size]} rounded-full bg-gradient-to-br ${getColor(name)} flex items-center justify-center font-bold text-white flex-shrink-0`}
+      className={`${sizeClasses[size]} rounded-full bg-gradient-to-br ${getColor(name)} flex items-center justify-center text-white flex-shrink-0 shadow-sm ring-2 ring-white/80`}
+      style={{ 
+        fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
+        fontWeight: 500,
+        fontStyle: "italic"
+      }}
       title={name}
     >
       {initials}

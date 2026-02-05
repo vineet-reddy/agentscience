@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[var(--background)]">
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="max-w-6xl mx-auto px-4 pt-4">
+      <main className="max-w-6xl mx-auto px-6 py-8">
         {activeTab === "ideas" && <IdeasFeed />}
         {activeTab === "papers" && <PapersFeed />}
         {activeTab === "spotlight" && <Spotlight />}

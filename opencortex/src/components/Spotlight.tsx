@@ -31,50 +31,52 @@ export default function Spotlight() {
   return (
     <div className="max-w-3xl mx-auto">
       {/* Hero section */}
-      <div className="text-center mb-10 pt-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-medium mb-4">
+      <div className="text-center mb-12 pt-10">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--warning-light)] border border-amber-200/50 text-amber-800 text-[13px] mb-5" style={{ fontFamily: "var(--font-crimson), 'Crimson Pro', Georgia, serif" }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
           </svg>
           Curated Collection
         </div>
-        <h2 className="text-2xl font-bold mb-2">Spotlight</h2>
-        <p className="text-sm text-[var(--muted)] max-w-md mx-auto">
+        <h2 className="text-3xl mb-3" style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif", fontWeight: 600, fontStyle: "italic" }}>
+          Spotlight
+        </h2>
+        <p className="text-[16px] text-[var(--muted)] max-w-lg mx-auto leading-relaxed" style={{ fontFamily: "var(--font-crimson), 'Crimson Pro', Georgia, serif" }}>
           The most impactful, well-crafted papers emerging from the OpenCortex
           community. Selected by both human reviewers and AI analysis.
         </p>
       </div>
 
       {/* Scoring explanation */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
-        <div className="border border-[var(--border)] rounded-xl p-4 bg-[var(--surface)] text-center">
-          <div className="text-2xl font-bold text-emerald-400 mb-1">
+      <div className="grid grid-cols-3 gap-4 mb-10">
+        <div className="border border-[var(--border)] rounded-2xl p-5 bg-[var(--surface)] text-center shadow-sm">
+          <div className="text-3xl mb-1.5 text-[var(--success)]" style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif", fontWeight: 600 }}>
             {papers.length}
           </div>
-          <div className="text-[10px] text-[var(--muted)] uppercase tracking-wider">
+          <div className="text-[11px] text-[var(--muted)] uppercase tracking-[0.15em]" style={{ fontFamily: "var(--font-mono), monospace" }}>
             Spotlight Papers
           </div>
         </div>
-        <div className="border border-[var(--border)] rounded-xl p-4 bg-[var(--surface)] text-center">
-          <div className="text-2xl font-bold text-indigo-400 mb-1">
+        <div className="border border-[var(--border)] rounded-2xl p-5 bg-[var(--surface)] text-center shadow-sm">
+          <div className="text-3xl mb-1.5 text-[var(--accent)]" style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif", fontWeight: 600 }}>
             {papers.reduce(
               (acc, p) => acc + new Set(p.authors.map((a) => a.user.id)).size,
               0
             )}
           </div>
-          <div className="text-[10px] text-[var(--muted)] uppercase tracking-wider">
+          <div className="text-[11px] text-[var(--muted)] uppercase tracking-[0.15em]" style={{ fontFamily: "var(--font-mono), monospace" }}>
             Contributors
           </div>
         </div>
-        <div className="border border-[var(--border)] rounded-xl p-4 bg-[var(--surface)] text-center">
-          <div className="text-2xl font-bold text-amber-400 mb-1">
+        <div className="border border-[var(--border)] rounded-2xl p-5 bg-[var(--surface)] text-center shadow-sm">
+          <div className="text-3xl mb-1.5 text-amber-700" style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif", fontWeight: 600 }}>
             {papers.length > 0
               ? (
                   papers.reduce((acc, p) => acc + p.score, 0) / papers.length
                 ).toFixed(1)
-              : "---"}
+              : "—"}
           </div>
-          <div className="text-[10px] text-[var(--muted)] uppercase tracking-wider">
+          <div className="text-[11px] text-[var(--muted)] uppercase tracking-[0.15em]" style={{ fontFamily: "var(--font-mono), monospace" }}>
             Avg Score
           </div>
         </div>
@@ -82,86 +84,87 @@ export default function Spotlight() {
 
       {/* Leaderboard */}
       {loading ? (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="border border-[var(--border)] rounded-xl p-5 animate-pulse"
+              className="border border-[var(--border)] rounded-2xl p-6 animate-pulse bg-[var(--surface)]"
             >
-              <div className="h-5 bg-[var(--border)] rounded w-2/3 mb-3" />
-              <div className="h-3 bg-[var(--border)] rounded w-full" />
+              <div className="h-5 bg-[var(--border)] rounded-full w-2/3 mb-4" />
+              <div className="h-4 bg-[var(--border)] rounded-full w-full" />
             </div>
           ))}
         </div>
       ) : papers.length === 0 ? (
-        <div className="border border-dashed border-[var(--border)] rounded-xl p-12 text-center">
-          <div className="text-4xl mb-4 opacity-30">
+        <div className="border-2 border-dashed border-[var(--border)] rounded-2xl p-14 text-center bg-[var(--surface-warm)]">
+          <div className="text-[var(--muted-soft)] mb-5">
             <svg
-              width="48"
-              height="48"
+              width="56"
+              height="56"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="1.5"
+              strokeWidth="1"
               className="mx-auto"
             >
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold mb-2">
+          <h3 className="text-xl mb-3" style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif", fontWeight: 600 }}>
             No spotlight papers yet
           </h3>
-          <p className="text-sm text-[var(--muted)] max-w-sm mx-auto">
+          <p className="text-[15px] text-[var(--muted)] max-w-sm mx-auto leading-relaxed" style={{ fontFamily: "var(--font-crimson), 'Crimson Pro', Georgia, serif" }}>
             Papers will be promoted to the Spotlight once they achieve sufficient quality scores
             from community review. Start by posting ideas and writing papers.
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {papers
             .sort((a, b) => b.score - a.score)
             .map((paper, index) => (
               <div
                 key={paper.id}
-                className="border border-[var(--border)] rounded-xl p-5 bg-[var(--surface)] hover:bg-[var(--surface-hover)] transition-colors relative overflow-hidden"
+                className="border border-[var(--border)] rounded-2xl p-6 bg-[var(--surface)] hover:border-[var(--accent-muted)] transition-all duration-300 relative overflow-hidden shadow-sm hover:shadow-md"
               >
                 {/* Rank badge */}
-                <div className="absolute top-4 right-4">
+                <div className="absolute top-5 right-5">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
+                    className={`w-12 h-12 rounded-full flex items-center justify-center text-lg ${
                       index === 0
-                        ? "bg-amber-500/20 text-amber-400 border-2 border-amber-500/30"
+                        ? "bg-[var(--warning-light)] text-amber-700 border-2 border-amber-300"
                         : index === 1
-                        ? "bg-gray-400/20 text-gray-300 border-2 border-gray-400/30"
-                        : "bg-orange-800/20 text-orange-400 border-2 border-orange-800/30"
+                        ? "bg-stone-100 text-stone-500 border-2 border-stone-300"
+                        : "bg-orange-50 text-orange-600 border-2 border-orange-200"
                     }`}
+                    style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif", fontWeight: 600, fontStyle: "italic" }}
                   >
                     #{index + 1}
                   </div>
                 </div>
 
                 {/* Score bar */}
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="flex-1 h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="flex-1 h-2 bg-[var(--border-light)] rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all"
+                      className="h-full bg-gradient-to-r from-[var(--accent)] to-amber-600 rounded-full transition-all"
                       style={{ width: `${paper.score}%` }}
                     />
                   </div>
-                  <span className="text-sm font-bold text-[var(--accent)]">
+                  <span className="text-[15px] text-[var(--accent)]" style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif", fontWeight: 600 }}>
                     {paper.score}
                   </span>
                 </div>
 
-                <h3 className="font-semibold text-base leading-snug pr-16">
+                <h3 className="text-lg leading-snug pr-16" style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif", fontWeight: 600 }}>
                   {paper.title}
                 </h3>
-                <p className="mt-2 text-sm text-[var(--foreground)]/70 leading-relaxed line-clamp-2">
+                <p className="mt-3 text-[15px] text-[var(--foreground-soft)] leading-[1.7] line-clamp-2" style={{ fontFamily: "var(--font-crimson), 'Crimson Pro', Georgia, serif" }}>
                   {paper.abstract}
                 </p>
 
-                <div className="mt-3 flex items-center gap-2">
-                  <div className="flex -space-x-1.5">
+                <div className="mt-4 flex items-center gap-3">
+                  <div className="flex -space-x-2">
                     {paper.authors.map((a) => (
                       <Avatar
                         key={a.user.id}
@@ -171,7 +174,7 @@ export default function Spotlight() {
                       />
                     ))}
                   </div>
-                  <span className="text-xs text-[var(--muted)]">
+                  <span className="text-[14px] text-[var(--muted)]" style={{ fontFamily: "var(--font-crimson), 'Crimson Pro', Georgia, serif", fontStyle: "italic" }}>
                     {paper.authors.map((a) => a.user.name).join(", ")}
                   </span>
                 </div>
@@ -181,19 +184,19 @@ export default function Spotlight() {
       )}
 
       {/* Open Datasets section */}
-      <div className="mt-12 border border-[var(--border)] rounded-xl p-6 bg-[var(--surface)]">
-        <h3 className="font-semibold mb-2 flex items-center gap-2">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <div className="mt-14 border border-[var(--border)] rounded-2xl p-7 bg-[var(--surface)] shadow-sm">
+        <h3 className="text-lg flex items-center gap-3 mb-2" style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif", fontWeight: 600 }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <ellipse cx="12" cy="5" rx="9" ry="3" />
             <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
             <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
           </svg>
           Open Datasets
         </h3>
-        <p className="text-xs text-[var(--muted)] mb-4">
+        <p className="text-[14px] text-[var(--muted)] mb-5" style={{ fontFamily: "var(--font-crimson), 'Crimson Pro', Georgia, serif" }}>
           Access these open neuroscience datasets programmatically for your research.
         </p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           {[
             {
               name: "OpenNeuro",
@@ -218,13 +221,13 @@ export default function Spotlight() {
           ].map((ds) => (
             <div
               key={ds.name}
-              className="border border-[var(--border)] rounded-lg p-3 hover:border-[var(--accent)]/30 transition-colors"
+              className="border border-[var(--border)] rounded-xl p-4 hover:border-[var(--accent-muted)] transition-all duration-300 bg-[var(--surface-warm)]"
             >
-              <div className="font-medium text-sm">{ds.name}</div>
-              <p className="text-[10px] text-[var(--muted)] mt-0.5 leading-relaxed">
+              <div className="text-[15px] mb-1" style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif", fontWeight: 500 }}>{ds.name}</div>
+              <p className="text-[12px] text-[var(--muted)] leading-relaxed mb-2" style={{ fontFamily: "var(--font-crimson), 'Crimson Pro', Georgia, serif" }}>
                 {ds.desc}
               </p>
-              <code className="text-[10px] text-indigo-400 mt-1 block">
+              <code className="text-[11px] text-[var(--accent)] block" style={{ fontFamily: "var(--font-mono), monospace" }}>
                 {ds.api}
               </code>
             </div>

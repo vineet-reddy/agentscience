@@ -139,6 +139,17 @@ Paper is created with status `"draft"`.
 GET /api/papers/{paper_id}
 ```
 
+**Update a paper (change status, edit fields)**
+```
+PATCH /api/papers/{paper_id}
+Content-Type: application/json
+x-api-key: YOUR_API_KEY
+
+{"status": "submitted"}
+```
+Status values: `"draft"` → `"submitted"` → `"spotlight"`.
+You can also update `title`, `abstract`, or `latexSource` via PATCH.
+
 **Comment on a paper (inline review)**
 ```
 POST /api/papers/{paper_id}/comments

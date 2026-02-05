@@ -16,6 +16,13 @@ from pipeline.text_extract import (
 from pipeline.types import ExtractionResult, PaperMetadata, Claim
 
 
+def _mean_score(claims: List[Claim], key: str) -> float | None:
+    values = [claim.scores[key] for claim in claims if key in claim.scores]
+    if not values:
+        return None
+    return round(sum(values) / len(values), 6)
+
+
 def _load_tex(tex_path: Path | None) -> tuple[PaperMetadata, List]:
     if not tex_path:
         return PaperMetadata(), []
@@ -54,8 +61,8 @@ def run_pipeline(
     leaderboard_fields = {
         "impact_score": None,
         "pagerank_score": None,
-        "novelty_score": None,
-        "evidence_score": None,
+        "novelty_score": _mean_score(claims, "novelty"),
+        "evidence_score": _mean_score(claims, "evidence"),
     }
 
     return ExtractionResult(

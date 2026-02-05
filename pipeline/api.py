@@ -4,10 +4,12 @@ import tempfile
 import uuid
 from pathlib import Path
 from typing import Dict, List, Optional
+from urllib.parse import quote
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
+import httpx
 
 from pipeline.extract import run_pipeline
 from pipeline.leaderboard import (
@@ -68,6 +70,65 @@ def _pdf_page_count(pdf_bytes: bytes) -> int:
         ) from exc
 
 
+def _openalex_citation_count(doi: Optional[str], title: Optional[str]) -> Optional[int]:
+    headers = {"User-Agent": "AgentScience/0.1"}
+    timeout = httpx.Timeout(5.0)
+    try:
+        with httpx.Client(timeout=timeout) as client:
+            if doi:
+                doi_url = f"https://api.openalex.org/works/https://doi.org/{quote(doi)}"
+                res = client.get(doi_url, headers=headers)
+                if res.status_code == 200:
+                    data = res.json()
+                    cited_by = data.get("cited_by_count")
+                    if isinstance(cited_by, int):
+                        return cited_by
+
+            if title:
+                res = client.get(
+                    "https://api.openalex.org/works",
+                    params={"search": title, "per-page": 1},
+                    headers=headers,
+                )
+                if res.status_code == 200:
+                    data = res.json()
+                    results = data.get("results") or []
+                    if results:
+                        cited_by = results[0].get("cited_by_count")
+                        if isinstance(cited_by, int):
+                            return cited_by
+    except Exception:
+        return None
+    return None
+
+
+def _openalex_citations_for_idea(idea_text: str) -> Optional[int]:
+    if not idea_text:
+        return None
+    query = " ".join(idea_text.split())
+    if len(query) > 280:
+        query = query[:280]
+    headers = {"User-Agent": "AgentScience/0.1"}
+    timeout = httpx.Timeout(5.0)
+    try:
+        with httpx.Client(timeout=timeout) as client:
+            res = client.get(
+                "https://api.openalex.org/works",
+                params={"search": query, "per-page": 1},
+                headers=headers,
+            )
+            if res.status_code == 200:
+                data = res.json()
+                results = data.get("results") or []
+                if results:
+                    cited_by = results[0].get("cited_by_count")
+                    if isinstance(cited_by, int):
+                        return cited_by
+    except Exception:
+        return None
+    return None
+
+
 @app.post("/extract")
 async def extract(pdf: UploadFile = File(...), tex: Optional[UploadFile] = File(default=None)):
     if pdf.content_type not in ("application/pdf", "application/x-pdf"):
@@ -96,7 +157,18 @@ async def extract(pdf: UploadFile = File(...), tex: Optional[UploadFile] = File(
             tex_path.write_bytes(tex_bytes)
 
         result = run_pipeline(pdf_path=pdf_path, tex_path=tex_path, top_key_ideas=5, top_breakthroughs=3)
-        return result.to_dict()
+        payload = result.to_dict()
+        metadata = payload.get("metadata") or {}
+        openalex_count = _openalex_citation_count(metadata.get("doi"), metadata.get("title"))
+        payload["citations"] = {"openalex": openalex_count}
+        for idea in payload.get("key_ideas", []) or []:
+            text = idea.get("text") if isinstance(idea, dict) else None
+            if not text:
+                continue
+            citations = _openalex_citations_for_idea(text)
+            scores = idea.setdefault("scores", {})
+            scores["openalex_citations"] = citations if citations is not None else 0
+        return payload
 
 
 @app.post("/leaderboard")

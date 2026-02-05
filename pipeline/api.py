@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import tempfile
 import uuid
 from pathlib import Path
@@ -7,6 +8,7 @@ from typing import Dict, List, Optional
 from urllib.parse import quote
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 import httpx
@@ -23,6 +25,19 @@ MAX_PAGES = 100
 
 app = FastAPI(title="AgentScience Extraction API", version="0.1.0")
 UI_PATH = Path(__file__).with_name("ui.html")
+
+_cors_origins_env = os.getenv("CORS_ALLOW_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
+_cors_origins = [origin.strip() for origin in _cors_origins_env.split(",") if origin.strip()]
+_cors_origin_regex = os.getenv("CORS_ALLOW_ORIGIN_REGEX", r"https://.*\.vercel\.app")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_cors_origins,
+    allow_origin_regex=_cors_origin_regex,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class CitationCountsPayload(BaseModel):

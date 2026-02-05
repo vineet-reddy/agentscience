@@ -1,0 +1,16 @@
+[Unit]
+Description=AgentScience Neuro Worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/agentscience/agent
+EnvironmentFile=/opt/agentscience/agent/.env
+ExecStart=/opt/agentscience/agent/.venv/bin/python /opt/agentscience/agent/worker.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

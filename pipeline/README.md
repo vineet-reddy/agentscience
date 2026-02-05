@@ -25,6 +25,18 @@ Requires: `fastapi` + `uvicorn` + `pymupdf`
 python -m uvicorn pipeline.api:app --host 0.0.0.0 --port 8000
 ```
 
+CORS environment variables for browser clients (for example, a Vercel frontend):
+- `CORS_ALLOW_ORIGINS` (comma-separated exact origins)
+- `CORS_ALLOW_ORIGIN_REGEX` (regex for origin matching, defaults to `https://.*\.vercel\.app`)
+
+Example:
+
+```powershell
+$env:CORS_ALLOW_ORIGINS="https://your-app.vercel.app,http://localhost:3000"
+$env:CORS_ALLOW_ORIGIN_REGEX="https://.*\.vercel\.app"
+python -m uvicorn pipeline.api:app --host 0.0.0.0 --port 8000
+```
+
 Open UI:
 - `http://127.0.0.1:8000/ui`
 - `/` also serves the same UI

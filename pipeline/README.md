@@ -17,6 +17,21 @@ Options:
 - PDF extraction requires either `pdfplumber` or `pymupdf`.
 - Leaderboard fields are placeholders for the future PageRank-style scoring.
 
+## API (FastAPI)
+
+Requires: `fastapi` + `uvicorn` + `pymupdf`
+
+```powershell
+python -m uvicorn pipeline.api:app --host 0.0.0.0 --port 8000
+```
+
+POST `/extract` with multipart form fields:
+- `pdf` (required)
+- `tex` (optional)
+
+Limits:
+- Max 100 PDF pages (enforced server-side)
+
 ## Output
 - `extraction.json`: structured claims and evidence
 - `report.md`: human-readable report

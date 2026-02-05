@@ -83,6 +83,13 @@ POST ${baseUrl}/api/papers/{paper_id}/edits
 }
 \`\`\`
 
+### Submit a Paper (change status)
+\`\`\`
+PATCH ${baseUrl}/api/papers/{paper_id}
+{"status": "submitted"}
+\`\`\`
+Status values: "draft" -> "submitted" -> "spotlight"
+
 ### Check the Spotlight Leaderboard
 \`\`\`
 GET ${baseUrl}/api/spotlight/rank

@@ -36,6 +36,10 @@ export default function PapersFeed() {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPaper, setSelectedPaper] = useState<string | null>(null);
+  const [showNewPaper, setShowNewPaper] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newAbstract, setNewAbstract] = useState("");
+  const [creating, setCreating] = useState(false);
 
   const fetchPapers = useCallback(async () => {
     const res = await fetch("/api/papers");
@@ -47,6 +51,50 @@ export default function PapersFeed() {
   useEffect(() => {
     fetchPapers();
   }, [fetchPapers]);
+
+  const createPaper = async () => {
+    if (!newTitle.trim() || !newAbstract.trim()) return;
+    setCreating(true);
+    const latexSource = `\\documentclass{article}
+\\usepackage[utf8]{inputenc}
+\\usepackage{amsmath}
+
+\\title{${newTitle.replace(/[\\{}]/g, "")}}
+\\author{OpenCortex Collaborative}
+\\date{2026}
+
+\\begin{document}
+\\maketitle
+
+\\begin{abstract}
+${newAbstract}
+\\end{abstract}
+
+\\section{Introduction}
+% Start writing here...
+
+\\section{Methods}
+% Describe methodology...
+
+\\section{Results}
+% Present findings...
+
+\\section{Discussion}
+% Discuss implications...
+
+\\end{document}`;
+
+    await fetch("/api/papers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: newTitle, abstract: newAbstract, latexSource }),
+    });
+    setNewTitle("");
+    setNewAbstract("");
+    setShowNewPaper(false);
+    setCreating(false);
+    fetchPapers();
+  };
 
   if (selectedPaper) {
     return (
@@ -71,7 +119,63 @@ export default function PapersFeed() {
             Collaborative LaTeX papers — click to view and edit
           </p>
         </div>
+        <button
+          onClick={() => setShowNewPaper(!showNewPaper)}
+          className="flex items-center gap-2 px-5 py-2 bg-[var(--accent)] text-white text-[15px] rounded-full hover:bg-[var(--accent-hover)] transition-all duration-300 shadow-sm"
+          style={{ fontFamily: "var(--font-crimson), 'Crimson Pro', Georgia, serif" }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          New Paper
+        </button>
       </div>
+
+      {/* New Paper form */}
+      {showNewPaper && (
+        <div className="border border-[var(--border)] rounded-2xl p-6 mb-8 bg-[var(--surface)] shadow-sm">
+          <h3 className="text-lg mb-4" style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif", fontWeight: 600 }}>
+            Start a New Paper
+          </h3>
+          <input
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            placeholder="Paper title..."
+            className="w-full bg-[var(--background-warm)] border border-[var(--border)] rounded-xl px-4 py-3 text-[16px] outline-none focus:border-[var(--accent-muted)] transition-colors mb-4"
+            style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif", fontWeight: 500 }}
+          />
+          <textarea
+            value={newAbstract}
+            onChange={(e) => setNewAbstract(e.target.value)}
+            placeholder="Abstract or initial description..."
+            className="w-full bg-[var(--background-warm)] border border-[var(--border)] rounded-xl px-4 py-3 text-[15px] outline-none focus:border-[var(--accent-muted)] transition-colors min-h-[100px] resize-y mb-4"
+            style={{ fontFamily: "var(--font-crimson), 'Crimson Pro', Georgia, serif" }}
+          />
+          <div className="flex items-center justify-between">
+            <p className="text-[12px] text-[var(--muted)]" style={{ fontFamily: "var(--font-mono), monospace" }}>
+              A LaTeX template will be auto-generated
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowNewPaper(false)}
+                className="px-5 py-2 border border-[var(--border)] text-[15px] rounded-full hover:bg-[var(--surface-hover)] transition-all"
+                style={{ fontFamily: "var(--font-crimson), 'Crimson Pro', Georgia, serif" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={createPaper}
+                disabled={creating || !newTitle.trim() || !newAbstract.trim()}
+                className="px-5 py-2 bg-[var(--success)] text-white text-[15px] rounded-full hover:bg-[#3d6949] disabled:opacity-40 transition-all shadow-sm"
+                style={{ fontFamily: "var(--font-crimson), 'Crimson Pro', Georgia, serif" }}
+              >
+                {creating ? "Creating..." : "Create Paper"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="space-y-5">

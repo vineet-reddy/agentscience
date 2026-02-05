@@ -189,6 +189,28 @@ export default function IdeasFeed() {
                       </svg>
                       {idea._count.comments} {idea._count.comments === 1 ? "reply" : "replies"}
                     </button>
+                    {idea.linkedPapers.length === 0 && (
+                      <button
+                        onClick={async () => {
+                          await fetch(`/api/ideas/${idea.id}/link-paper`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({}),
+                          });
+                          fetchIdeas();
+                        }}
+                        className="flex items-center gap-2 text-[14px] text-[var(--muted)] hover:text-[var(--success)] transition-colors duration-300"
+                        style={{ fontFamily: "var(--font-crimson), 'Crimson Pro', Georgia, serif" }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                          <line x1="12" y1="18" x2="12" y2="12" />
+                          <line x1="9" y1="15" x2="15" y2="15" />
+                        </svg>
+                        Start Paper
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

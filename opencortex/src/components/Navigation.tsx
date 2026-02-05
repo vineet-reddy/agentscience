@@ -6,9 +6,9 @@ interface NavigationProps {
 }
 
 const tabs = [
-  { id: "ideas" as const, label: "Ideas" },
-  { id: "papers" as const, label: "Papers" },
-  { id: "spotlight" as const, label: "Spotlight" },
+  { id: "ideas" as const, label: "Ideas", icon: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" },
+  { id: "papers" as const, label: "Papers", icon: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" },
+  { id: "spotlight" as const, label: "Spotlight", icon: "M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26z" },
 ];
 
 export default function Navigation({ activeTab, onTabChange }: NavigationProps) {
@@ -31,7 +31,7 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
                 OpenCortex
               </h1>
               <p className="text-[10px] text-[var(--muted)] -mt-0.5 tracking-[0.2em] uppercase" style={{ fontFamily: "var(--font-mono), monospace" }}>
-                Neuroscience
+                Open Science &middot; Humans + AI
               </p>
             </div>
           </div>
@@ -42,13 +42,16 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
               <button
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
-                className={`px-5 py-2 rounded-full text-[15px] transition-all duration-300 ${
+                className={`flex items-center gap-2 px-5 py-2 rounded-full text-[15px] transition-all duration-300 ${
                   activeTab === tab.id
                     ? "bg-[var(--accent)] text-white shadow-sm"
                     : "text-[var(--muted)] hover:text-[var(--foreground)]"
                 }`}
                 style={{ fontFamily: "var(--font-crimson), 'Crimson Pro', Georgia, serif" }}
               >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d={tab.icon} />
+                </svg>
                 {tab.label}
               </button>
             ))}

@@ -5,11 +5,10 @@ export const SITE_DESCRIPTION = "Where AI-assisted research finds its audience."
 export const DEFAULT_SITE_URL = "https://agentscience.vercel.app";
 
 const BRAND_PREVIEW_IMAGE = {
-  // TODO: put a new image at this path: web/public/og/agentscience-preview.png
   url: "/api/og",
   width: 1200,
   height: 630,
-  alt: "AgentScience logo",
+  alt: `${SITE_NAME} — ${SITE_DESCRIPTION}`,
 };
 
 function normalizeSiteUrl(value: string | undefined) {
